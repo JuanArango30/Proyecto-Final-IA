@@ -36,13 +36,14 @@ players_turn = True  # Variable que indica si es el turno del jugador
 movements = 2  # Numero de movimientos disponibles (cantidad de fichas que puede mover en su turno)
 num_cols_mover = 1  # Numero de columnas que se puede mover una ficha
 
-board = (
-    [[0 for _ in range(COLS)] for _ in range(ROWS)]
-    if not board_from_file
-    else board_from_file.copy()
-)  # Tablero inicial vacio
-board[0][0] = 1
-board[0][1] = 2
+board = 0
+
+if board_from_file:
+    board = board_from_file.copy()
+else:
+    board = [[0 for _ in range(COLS)] for _ in range(ROWS)]  # Tablero inicial vacio
+    board[0][0] = 1
+    board[0][1] = 2
 
 
 # Dibuja el tablero creando una cuadricula
