@@ -1,6 +1,7 @@
 # Necesario para hacer visibles los archivos entre front y back
 import sys
 import os
+import copy
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -39,7 +40,7 @@ num_cols_mover = 1  # Numero de columnas que se puede mover una ficha
 board = 0
 
 if board_from_file:
-    board = board_from_file.copy()
+    board = copy.deepcopy(board_from_file)
 else:
     board = [[0 for _ in range(COLS)] for _ in range(ROWS)]  # Tablero inicial vacio
     board[0][0] = 1
