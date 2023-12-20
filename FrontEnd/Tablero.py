@@ -141,6 +141,7 @@ def cal_movements (board, new_pos_piece):
 
     if num_cols_mover == 0:
         movements = 0
+        num_cols_mover = 1
 
 selected_piece = None
 
