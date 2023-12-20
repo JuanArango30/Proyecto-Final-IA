@@ -15,7 +15,7 @@ pygame.init()
 
 # Dimensiones de la pantalla
 SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
+SCREEN_HEIGHT = 630
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Linja")
@@ -26,6 +26,11 @@ WHITE = (255, 255, 255)  # Color de las celdas del tablero
 RED = (255, 0, 0)
 BLACK = (0, 0, 0)
 HALO_COLOR = (100, 235, 52)
+
+
+FONT_SIZE = 30
+font = pygame.font.Font(None, FONT_SIZE) # Fuente para el texto
+
 
 # Dimensiones del tablero
 ROWS = 6
@@ -116,11 +121,26 @@ def deselect_piece():
 def move_piece(selected, x, y):
     col = x // CELL_SIZE
     row = y // CELL_SIZE
-    if (selected and not board[row][col]):  # Por ahora, simplemente mover si la celda está vacía
+    if (selected and not board[row][col] and movements > 0):  # Por ahora, simplemente mover si la celda está vacía
         if (col > selected[1]):
             board[row][col] = board[selected[0]][selected[1]]
             board[selected[0]][selected[1]] = None
+            cal_movements(board,(row, col))
 
+def cal_movements (board, new_pos_piece):
+    contador = 0
+    for row in range(ROWS):
+        for col in range(COLS):
+            if ((new_pos_piece[1] == col) and (board[row][col])):
+                contador += 1
+    global movements
+    movements -=1
+
+    global num_cols_mover
+    num_cols_mover = contador - 1
+
+    if num_cols_mover == 0:
+        movements = 0
 
 selected_piece = None
 
@@ -128,7 +148,7 @@ selected_piece = None
 def main():
     global select_piece
     selected_piece = None
-
+    
     running = True
     while running:
         for event in pygame.event.get():
@@ -150,6 +170,13 @@ def main():
 
         draw_board()
         draw_pieces(board, selected_piece)
+
+        text_surface = font.render(f"Fichas por mover: {movements}", True, (255, 255, 255))
+        screen.blit(text_surface, (10, SCREEN_HEIGHT - FONT_SIZE + 5))  # 10 píxeles desde el borde y 10 píxeles por encima del borde inferior
+
+        text_surface2 = font.render(f"Casillas a mover: {num_cols_mover}", True, (255, 255, 255))
+        screen.blit(text_surface2, (SCREEN_WIDTH - 300, SCREEN_HEIGHT - FONT_SIZE + 5))  # 150 píxeles desde el borde derecho y 10 píxeles por encima del borde inferior
+
 
         pygame.display.flip()
         clock.tick(60)
