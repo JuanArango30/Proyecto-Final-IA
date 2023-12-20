@@ -116,11 +116,10 @@ def deselect_piece():
 def move_piece(selected, x, y):
     col = x // CELL_SIZE
     row = y // CELL_SIZE
-    if (
-        selected and not board[row][col] 
-    ):  # Por ahora, simplemente mover si la celda está vacía
-        board[row][col] = board[selected[0]][selected[1]]
-        board[selected[0]][selected[1]] = None
+    if (selected and not board[row][col]):  # Por ahora, simplemente mover si la celda está vacía
+        if (col > selected[1]):
+            board[row][col] = board[selected[0]][selected[1]]
+            board[selected[0]][selected[1]] = None
 
 
 selected_piece = None
