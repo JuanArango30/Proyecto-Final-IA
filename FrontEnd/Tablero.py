@@ -43,8 +43,6 @@ if board_from_file:
     board = copy.deepcopy(board_from_file)
 else:
     board = [[0 for _ in range(COLS)] for _ in range(ROWS)]  # Tablero inicial vacio
-    board[0][0] = 1
-    board[0][1] = 2
 
 
 # Dibuja el tablero creando una cuadricula
@@ -103,7 +101,7 @@ def draw_pieces(board, selected_piece):
 def select_piece(x, y):
     col = x // CELL_SIZE
     row = y // CELL_SIZE
-    if board[row][col]:
+    if board[row][col] and board[row][col] == 1:
         return row, col
     return None
 
@@ -119,7 +117,7 @@ def move_piece(selected, x, y):
     col = x // CELL_SIZE
     row = y // CELL_SIZE
     if (
-        selected and not board[row][col]
+        selected and not board[row][col] 
     ):  # Por ahora, simplemente mover si la celda está vacía
         board[row][col] = board[selected[0]][selected[1]]
         board[selected[0]][selected[1]] = None
