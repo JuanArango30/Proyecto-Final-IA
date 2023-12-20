@@ -28,8 +28,6 @@ class Linja:
     def avanzarPosiblesMovimientosIA(self):
         actualidad = copy.deepcopy(self.tablero)
 
-        espacioLibre = False
-
         posicionFichaCol = 0
 
         posicionFichaFila = 0
