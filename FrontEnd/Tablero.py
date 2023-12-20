@@ -39,7 +39,7 @@ CELL_SIZE = 100
 
 
 players_turn = True  # Variable que indica si es el turno del jugador
-movements = 2  # Numero de movimientos disponibles (cantidad de fichas que puede mover en su turno)
+movements = 200  # Numero de movimientos disponibles (cantidad de fichas que puede mover en su turno)
 num_cols_mover = 1  # Numero de columnas que se puede mover una ficha
 
 board = 0
@@ -121,7 +121,7 @@ def deselect_piece():
 def move_piece(selected, x, y):
     col = x // CELL_SIZE
     row = y // CELL_SIZE
-    if (selected and not board[row][col] and movements > 0):  # Por ahora, simplemente mover si la celda está vacía
+    if (selected and not board[row][col] and movements > 0 and selected[1] + num_cols_mover >= col):  # Por ahora, simplemente mover si la celda está vacía
         if (col > selected[1]):
             board[row][col] = board[selected[0]][selected[1]]
             board[selected[0]][selected[1]] = None
