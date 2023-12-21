@@ -36,7 +36,7 @@ def heuristica(tablero_linja: Linja) -> int:
     return puntaje_rojas + puntaje_negras
 
 
-def minimax(tablero_linja: Linja, jugador, profundidad):
+def minimax(tablero_linja: Linja, jugador, profundidad=0):
     if profundidad == 2 or tablero_linja.fin_del_juego():
         print("Entró")
         return tablero_linja.tablero, int(heuristica(tablero_linja))
