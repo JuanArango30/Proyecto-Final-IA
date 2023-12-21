@@ -1,12 +1,14 @@
-# Necesario para hacer visibles los archivos entre front y back
+import copy
+import pygame
 import sys
 import os
-import copy
 
+# Necesario para hacer visibles los archivos entre front y back
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-import pygame
-from BackEnd.Lector import seleccionar_archivo
+from Lector import seleccionar_archivo
+from Linja import Linja
+from Minimax import minimax
 
 # Tablero por archivo de texto (se abre seleccionar archivo antes de iniciar el juego)
 board_from_file = seleccionar_archivo()
@@ -29,7 +31,7 @@ HALO_COLOR = (100, 235, 52)
 
 
 FONT_SIZE = 30
-font = pygame.font.Font(None, FONT_SIZE) # Fuente para el texto
+font = pygame.font.Font(None, FONT_SIZE)  # Fuente para el texto
 
 
 # Dimensiones del tablero
@@ -38,16 +40,15 @@ COLS = 8
 CELL_SIZE = 100
 
 
-players_turn = True  # Variable que indica si es el turno del jugador
-movements = 2  # Numero de movimientos disponibles (cantidad de fichas que puede mover en su turno)
-num_cols_mover = 1  # Numero de columnas que se puede mover una ficha
-
 board = 0
 
 if board_from_file:
     board = copy.deepcopy(board_from_file)
 else:
     board = [[0 for _ in range(COLS)] for _ in range(ROWS)]  # Tablero inicial vacio
+
+linja = Linja(tablero=board, jugador=1)
+board = linja.tablero
 
 
 # Dibuja el tablero creando una cuadricula
@@ -121,27 +122,47 @@ def deselect_piece():
 def move_piece(selected, x, y):
     col = x // CELL_SIZE
     row = y // CELL_SIZE
-    if (selected and not board[row][col] and movements > 0 and selected[1] + num_cols_mover == col):  # Por ahora, simplemente mover si la celda está vacía
-        if (col > selected[1]):
+    if (
+        selected
+        and not board[row][col]
+        and linja.turnos_restantes > 0
+        and selected[1] + linja.cantidadMovimiento == col
+    ):  # Por ahora, simplemente mover si la celda está vacía
+        if col > selected[1]:
             board[row][col] = board[selected[0]][selected[1]]
             board[selected[0]][selected[1]] = None
-            cal_movements(board,(row, col))
+            cal_movements(board, (row, col))
+    elif (
+        selected
+        and linja.turnos_restantes > 0
+        and selected[1] + linja.cantidadMovimiento >= col
+        and col == 7
+    ):
+        board[selected[0]][selected[1]] = None
+        linja.turnos_restantes = 0
 
-def cal_movements (board, new_pos_piece):
+
+def cal_movements(board, new_pos_piece):
     contador = 0
     for row in range(ROWS):
         for col in range(COLS):
-            if ((new_pos_piece[1] == col) and (board[row][col])):
+            if (new_pos_piece[1] == col) and (board[row][col]):
                 contador += 1
-    global movements
-    movements -=1
+    linja.turnos_restantes -= 1
 
-    global num_cols_mover
-    num_cols_mover = contador - 1
+    linja.cantidadMovimiento = contador - 1
 
-    if num_cols_mover == 0:
-        movements = 0
-        num_cols_mover = 1
+    if linja.cantidadMovimiento == 0:
+        linja.cantidadMovimiento = 1
+        linja.turnos_restantes = 0
+
+
+def AITurn():
+    linja.jugador = 2
+    linja.cantidadMovimiento = 1
+    linja.turnos_restantes = 2
+    linja.posibles_movimientos()
+
 
 selected_piece = None
 
@@ -149,7 +170,7 @@ selected_piece = None
 def main():
     global select_piece
     selected_piece = None
-    
+
     running = True
     while running:
         for event in pygame.event.get():
@@ -172,12 +193,19 @@ def main():
         draw_board()
         draw_pieces(board, selected_piece)
 
-        text_surface = font.render(f"Fichas por mover: {movements}", True, (255, 255, 255))
-        screen.blit(text_surface, (10, SCREEN_HEIGHT - FONT_SIZE + 5))  # 10 píxeles desde el borde y 10 píxeles por encima del borde inferior
+        text_surface = font.render(
+            f"Fichas por mover: {linja.turnos_restantes}", True, (255, 255, 255)
+        )
+        screen.blit(
+            text_surface, (10, SCREEN_HEIGHT - FONT_SIZE + 5)
+        )  # 10 píxeles desde el borde y 10 píxeles por encima del borde inferior
 
-        text_surface2 = font.render(f"Casillas a mover: {num_cols_mover}", True, (255, 255, 255))
-        screen.blit(text_surface2, (SCREEN_WIDTH - 300, SCREEN_HEIGHT - FONT_SIZE + 5))  # 150 píxeles desde el borde derecho y 10 píxeles por encima del borde inferior
-
+        text_surface2 = font.render(
+            f"Casillas a mover: {linja.cantidadMovimiento}", True, (255, 255, 255)
+        )
+        screen.blit(
+            text_surface2, (SCREEN_WIDTH - 300, SCREEN_HEIGHT - FONT_SIZE + 5)
+        )  # 150 píxeles desde el borde derecho y 10 píxeles por encima del borde inferior
 
         pygame.display.flip()
         clock.tick(60)

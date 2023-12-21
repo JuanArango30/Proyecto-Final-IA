@@ -37,7 +37,7 @@ def heuristica(tablero_linja: Linja) -> int:
 
 
 def minimax(tablero_linja: Linja, jugador, profundidad):
-    if profundidad == 3 or tablero_linja.fin_del_juego():
+    if profundidad == 2 or tablero_linja.fin_del_juego():
         print("Entró")
         return tablero_linja.tablero, int(heuristica(tablero_linja))
 
@@ -66,19 +66,19 @@ def minimax(tablero_linja: Linja, jugador, profundidad):
         return mejor_jugada, valor_heuristica
 
 
-matriz = [
-    [1, 2, 2, 2, 2, 2, 2, 2],
-    [1, 0, 0, 0, 0, 0, 0, 2],
-    [1, 0, 0, 0, 0, 0, 0, 2],
-    [1, 0, 0, 0, 0, 0, 0, 2],
-    [1, 0, 0, 0, 0, 0, 0, 2],
-    [1, 1, 1, 1, 1, 1, 1, 2],
-]
+# matriz = [
+#     [1, 2, 2, 2, 2, 2, 2, 2],
+#     [1, 0, 0, 0, 0, 0, 0, 2],
+#     [1, 0, 0, 0, 0, 0, 0, 2],
+#     [1, 0, 0, 0, 0, 0, 0, 2],
+#     [1, 0, 0, 0, 0, 0, 0, 2],
+#     [1, 1, 1, 1, 1, 1, 1, 2],
+# ]
 
-linja = Linja(
-    matriz,
-)
+# linja = Linja(
+#     matriz,
+# )
 
-res = minimax(linja, 2, 0)
-print(res[0])
-print(res[1])
+# res = minimax(linja, 2, 0)
+# print(res[0])
+# print(res[1])
