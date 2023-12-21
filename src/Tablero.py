@@ -130,16 +130,18 @@ def move_piece(selected, x, y):
     ):  # Por ahora, simplemente mover si la celda está vacía
         if col > selected[1]:
             board[row][col] = board[selected[0]][selected[1]]
-            board[selected[0]][selected[1]] = None
+            board[selected[0]][selected[1]] = 0
             cal_movements(board, (row, col))
+            cal_turn()
     elif (
         selected
         and linja.turnos_restantes > 0
         and selected[1] + linja.cantidadMovimiento >= col
         and col == 7
     ):
-        board[selected[0]][selected[1]] = None
+        board[selected[0]][selected[1]] = 0
         linja.turnos_restantes = 0
+        cal_turn()
 
 
 def cal_movements(board, new_pos_piece):
@@ -157,11 +159,14 @@ def cal_movements(board, new_pos_piece):
         linja.turnos_restantes = 0
 
 
-def AITurn():
-    linja.jugador = 2
-    linja.cantidadMovimiento = 1
-    linja.turnos_restantes = 2
-    linja.posibles_movimientos()
+def cal_turn():
+    if linja.jugador == 1 and linja.turnos_restantes == 0:
+        linja.jugador = 2
+        linja.cantidadMovimiento = 1
+        linja.turnos_restantes = 2
+    print(f"jugador: {linja.jugador}")
+
+
 
 
 selected_piece = None
@@ -173,20 +178,32 @@ def main():
 
     running = True
     while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                x, y = pygame.mouse.get_pos()
-                if pygame.mouse.get_pressed()[0]:  # Botón izquierdo del mouse
-                    if not selected_piece:
-                        selected_piece = select_piece(x, y)
-                    else:
-                        move_piece(selected_piece, x, y)
+        if linja.jugador == 1 and not linja.fin_del_juego():
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    x, y = pygame.mouse.get_pos()
+                    if pygame.mouse.get_pressed()[0]:  # Botón izquierdo del mouse
+                        if not selected_piece:
+                            selected_piece = select_piece(x, y)
+                        else:
+                            move_piece(selected_piece, x, y)
+                            selected_piece = None
+                    elif pygame.mouse.get_pressed()[2]:  # Botón derecho del mouse
+                        print(f"jugador: {linja.jugador}")
+                        deselect_piece()
                         selected_piece = None
-                elif pygame.mouse.get_pressed()[2]:  # Botón derecho del mouse
-                    deselect_piece()
-                    selected_piece = None
+        elif linja.jugador == 2 and not linja.fin_del_juego():
+            print("Tablero viejo: \n",linja.tablero)
+            new_board = minimax(linja, 2)[0]
+            linja.tablero = copy.deepcopy(new_board)
+            print("Tablero nuevo: \n",linja.tablero)
+            global board
+            board = linja.tablero
+            linja.jugador = 1
+        elif (linja.fin_del_juego):
+            print("El juego ha terminado")
 
         screen.fill(BLACK)
 
