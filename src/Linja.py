@@ -208,11 +208,11 @@ class Linja:
                     nuevo_tablero = self.calcular_movimiento(fila, columna)
                     if nuevo_tablero:
                         primer_movimiento.append(nuevo_tablero)
-            print("Primer movimiento".center(50, "-"))
-            self.impresion(primer_movimiento)
-            print("\n")
+            # print("Primer movimiento".center(50, "-"))
+            # self.impresion(primer_movimiento)
+            # print("\n")
 
-            print("Segundo movimiento".center(50, "-"))
+            # print("Segundo movimiento".center(50, "-"))
 
             # Recorrer las posibilidades del primer movimiento para el segundo movimiento
             i = 0  # Para propositos de print
@@ -224,13 +224,13 @@ class Linja:
                         nuevo_tablero = tablero.calcular_movimiento(fila, columna)
                         if nuevo_tablero:
                             segundo_movimiento.append(nuevo_tablero)
-                            print(f"Posibilidades para el movimiento {i}")
-                            self.impresionSegundo(nuevo_tablero)
-                print("\n")
+                #             print(f"Posibilidades para el movimiento {i}")
+                #             self.impresionSegundo(nuevo_tablero)
+                # print("\n")
                 i += 1
 
-        else:
-            print("\n" + "Fin del juego".center(50, "-"), end="\n")
+        # else:
+        #     print("\n" + "Fin del juego".center(50, "-"), end="\n")
 
         return copy.deepcopy(segundo_movimiento)
 

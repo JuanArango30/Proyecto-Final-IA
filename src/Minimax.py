@@ -32,13 +32,11 @@ def heuristica(tablero_linja: Linja) -> int:
                     puntaje_rojas += 2
                 if columna == 4:
                     puntaje_rojas += 1
-    print(f"Heuristica: {puntaje_rojas + puntaje_negras}")
     return puntaje_rojas + puntaje_negras
 
 
 def minimax(tablero_linja: Linja, jugador, profundidad=0):
     if profundidad == 2 or tablero_linja.fin_del_juego():
-        print("Entró")
         return tablero_linja.tablero, int(heuristica(tablero_linja))
 
     mejor_jugada = None
@@ -47,7 +45,6 @@ def minimax(tablero_linja: Linja, jugador, profundidad=0):
         maximo = float("-inf")
         jugadas = tablero_linja.posibles_movimientos()
         for jugada in jugadas:
-            print(profundidad)
             tablero_linja_aux, valor_heuristica = minimax(jugada, 2, profundidad + 1)
             print(valor_heuristica)
             if valor_heuristica >= maximo:
@@ -58,7 +55,6 @@ def minimax(tablero_linja: Linja, jugador, profundidad=0):
         minimo = float("inf")
         jugadas = tablero_linja.posibles_movimientos()
         for jugada in jugadas:
-            print(profundidad)
             tablero_linja_aux, valor_heuristica = minimax(jugada, 2, profundidad + 1)
             if valor_heuristica < minimo:
                 minimo = valor_heuristica
