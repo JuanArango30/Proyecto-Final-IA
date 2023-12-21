@@ -245,8 +245,9 @@ def main():
         # Centro
         if linja.juego_terminado:
             text_surface = font.render(
-                f"¡Ganan las {"rojas!" if heuristica(linja)[1] > heuristica(linja)[2] else "negras!"}", True, (255, 255, 255)
-            )
+                f"¡Ganan las {'rojas!' if heuristica(linja)[1] > heuristica(linja)[2] else 'negras!'}", True, (255, 255, 255)
+                )
+
             screen.blit(text_surface, (320, SCREEN_HEIGHT - 60))
 
             text_surface2 = font.render(
