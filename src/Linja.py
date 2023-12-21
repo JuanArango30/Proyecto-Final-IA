@@ -18,11 +18,18 @@ class Linja:
         self.cantidadMovimiento = cantidadMovimiento
         self.fichasMetaNegra = fichasMetaNegra
         self.fichasMetaRoja = fichasMetaRoja
+        self.juego_terminado = self.fin_del_juego()
 
-    def get_tablero(self):
-        return copy.deepcopy(self.tablero)
+    def actualizar_juego(self, other):
+        self.tablero = copy.deepcopy(other.tablero)
+        self.jugador = other.jugador
+        self.turnos_restantes = other.turnos_restantes
+        self.cantidadMovimiento = other.cantidadMovimiento
+        self.fichasMetaNegra = other.fichasMetaNegra
+        self.fichasMetaRoja = other.fichasMetaRoja
+        self.juego_terminado = self.fin_del_juego()
 
-    def fin_del_juego(self) -> bool:
+    def fin_del_juego(self):
         # Búsqueda de la ficha roja de más a la izquierda (porque terminan a la derecha)
         menor_columna_rojas = 7
         for columna in range(7, -1, -1):
@@ -175,7 +182,9 @@ class Linja:
                     # Se actualiza una copia del tablero con el movimiento
                     nuevo_tablero = copy.deepcopy(self.tablero)
                     nuevo_tablero[fila_ficha][columna_ficha] = 0
-                    nuevo_tablero[nueva_posicion[0]][nueva_posicion[1]] = 2
+                    nuevo_tablero[nueva_posicion[0]][nueva_posicion[1]] = (
+                        2 if nueva_columna != 0 else 0
+                    )
 
                     # Se crea una nueva instancia con el tablero actualizado
                     linja_siguiente_movimiento = Linja(
@@ -186,6 +195,10 @@ class Linja:
                         self.fichasMetaRoja,
                         self.fichasMetaNegra,
                     )
+
+                    if nueva_columna == 0:
+                        linja_siguiente_movimiento.cantidadMovimiento = 0
+                        linja_siguiente_movimiento.fichasMetaNegra += 1
 
                     # Se calcula si hay próximo movimiento y quién sigue
                     linja_siguiente_movimiento.cantidad_proximo_movimiento(
@@ -208,30 +221,21 @@ class Linja:
                     nuevo_tablero = self.calcular_movimiento(fila, columna)
                     if nuevo_tablero:
                         primer_movimiento.append(nuevo_tablero)
-            # print("Primer movimiento".center(50, "-"))
-            # self.impresion(primer_movimiento)
-            # print("\n")
-
-            # print("Segundo movimiento".center(50, "-"))
 
             # Recorrer las posibilidades del primer movimiento para el segundo movimiento
-            i = 0  # Para propositos de print
             for tablero in primer_movimiento:
                 # Recorrer la matriz por filas y columnas (primer movimiento)
                 for fila in range(6):
                     for columna in range(8):
-                        # Calcular el movimiento de la ficha actual
-                        nuevo_tablero = tablero.calcular_movimiento(fila, columna)
-                        if nuevo_tablero:
-                            segundo_movimiento.append(nuevo_tablero)
-                #             print(f"Posibilidades para el movimiento {i}")
-                #             self.impresionSegundo(nuevo_tablero)
-                # print("\n")
-                i += 1
-
-        # else:
-        #     print("\n" + "Fin del juego".center(50, "-"), end="\n")
-
+                        if tablero.jugador == 1:
+                            tablero.jugador = 2
+                            segundo_movimiento.append(tablero)
+                        else:
+                            nuevo_tablero = tablero.calcular_movimiento(fila, columna)
+                            if nuevo_tablero:
+                                segundo_movimiento.append(nuevo_tablero)
+        if not segundo_movimiento:
+            return copy.deepcopy(primer_movimiento)
         return copy.deepcopy(segundo_movimiento)
 
     def impresion(self, lista_movimientos: list):

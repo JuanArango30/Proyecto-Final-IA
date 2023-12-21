@@ -8,7 +8,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from Lector import seleccionar_archivo
 from Linja import Linja
-from Minimax import minimax
+from Minimax import minimax, heuristica
 
 # Tablero por archivo de texto (se abre seleccionar archivo antes de iniciar el juego)
 board_from_file = seleccionar_archivo()
@@ -17,7 +17,7 @@ pygame.init()
 
 # Dimensiones de la pantalla
 SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 630
+SCREEN_HEIGHT = 680
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Linja")
@@ -45,7 +45,14 @@ board = 0
 if board_from_file:
     board = copy.deepcopy(board_from_file)
 else:
-    board = [[0 for _ in range(COLS)] for _ in range(ROWS)]  # Tablero inicial vacio
+    board = [
+        [1, 2, 2, 2, 2, 2, 2, 2],
+        [1, 0, 0, 0, 0, 0, 0, 2],
+        [1, 0, 0, 0, 0, 0, 0, 2],
+        [1, 0, 0, 0, 0, 0, 0, 2],
+        [1, 0, 0, 0, 0, 0, 0, 2],
+        [1, 1, 1, 1, 1, 1, 1, 2],
+    ]  # Tablero inicial vacio
 
 linja = Linja(tablero=board, jugador=1)
 board = linja.tablero
@@ -127,6 +134,7 @@ def move_piece(selected, x, y):
         and not board[row][col]
         and linja.turnos_restantes > 0
         and selected[1] + linja.cantidadMovimiento == col
+        and col != 7
     ):  # Por ahora, simplemente mover si la celda está vacía
         if col > selected[1]:
             board[row][col] = board[selected[0]][selected[1]]
@@ -141,6 +149,7 @@ def move_piece(selected, x, y):
     ):
         board[selected[0]][selected[1]] = 0
         linja.turnos_restantes = 0
+        linja.fichasMetaRoja += 1
         cal_turn()
 
 
@@ -161,12 +170,11 @@ def cal_movements(board, new_pos_piece):
 
 def cal_turn():
     if linja.jugador == 1 and linja.turnos_restantes == 0:
+        linja.juego_terminado = linja.fin_del_juego()
         linja.jugador = 2
         linja.cantidadMovimiento = 1
         linja.turnos_restantes = 2
     print(f"jugador: {linja.jugador}")
-
-
 
 
 selected_piece = None
@@ -178,57 +186,84 @@ def main():
 
     running = True
     while running:
-        if linja.jugador == 1 and not linja.fin_del_juego():
-            for event in pygame.event.get():
+        # if linja.jugador == 1 and not linja.juego_terminado:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
 
-                if event.type == pygame.QUIT:
-                    running = False
+            elif (
+                event.type == pygame.MOUSEBUTTONDOWN
+                and linja.jugador == 1
+                and not linja.juego_terminado
+            ):
+                x, y = pygame.mouse.get_pos()
 
-                elif event.type == pygame.MOUSEBUTTONDOWN:
-                    x, y = pygame.mouse.get_pos()
+                if pygame.mouse.get_pressed()[0]:  # Botón izquierdo del mouse
+                    if not selected_piece:
+                        selected_piece = select_piece(x, y)
 
-                    if pygame.mouse.get_pressed()[0]:  # Botón izquierdo del mouse
-                        
-                        if not selected_piece:
-                            selected_piece = select_piece(x, y)
-
-                        else:
-                            move_piece(selected_piece, x, y)
-                            selected_piece = None
-
-                    elif pygame.mouse.get_pressed()[2]:  # Botón derecho del mouse
-                        print(f"jugador: {linja.jugador}")
-                        deselect_piece()
+                    else:
+                        move_piece(selected_piece, x, y)
                         selected_piece = None
 
-        elif linja.jugador == 2 and not linja.fin_del_juego():
-            new_board = minimax(linja, 2)[0]
-            linja.tablero = copy.deepcopy(new_board)
-            global board
-            board = linja.tablero
-            linja.jugador = 1
+                elif pygame.mouse.get_pressed()[2]:  # Botón derecho del mouse
+                    print(f"jugador: {linja.jugador}")
+                    deselect_piece()
+                    selected_piece = None
 
-        elif (linja.fin_del_juego):
-            print("El juego ha terminado")
+            elif linja.jugador == 2 and not linja.juego_terminado:
+                global board
+                print(f"Tablero viejo: \n{board}")
+                new_board = minimax(linja, 2, float("-inf"), float("inf"))[0]
+                print(f"Tablero nuevo: \n{new_board.tablero}")
+                linja.actualizar_juego(new_board)
+                board = linja.tablero
+                linja.jugador = 1
+                linja.turnos_restantes = 2
+                linja.cantidadMovimiento = 1
+
+        # elif linja.juego_terminado:
+        #     # print("El juego ha terminado")
+        #     clock.tick(0)
 
         screen.fill(BLACK)
 
         draw_board()
         draw_pieces(board, selected_piece)
 
+        # Izquierda
+        text_surface = font.render(
+            f"Fichas negras afuera: {linja.fichasMetaNegra}", True, (255, 255, 255)
+        )
+        screen.blit(text_surface, (10, SCREEN_HEIGHT - FONT_SIZE))
+
+        text_surface2 = font.render(
+            f"Fichas rojas afuera: {linja.fichasMetaRoja}", True, (255, 255, 255)
+        )
+        screen.blit(text_surface2, (10, SCREEN_HEIGHT - 60))
+
+        # Centro
+        if linja.juego_terminado:
+            text_surface = font.render(
+                f"¡Ganan las {"rojas!" if heuristica(linja)[1] > heuristica(linja)[2] else "negras!"}", True, (255, 255, 255)
+            )
+            screen.blit(text_surface, (320, SCREEN_HEIGHT - 60))
+
+            text_surface2 = font.render(
+                f"Puntuación: {max(heuristica(linja))}", True, (255, 255, 255)
+            )
+            screen.blit(text_surface2, (340, SCREEN_HEIGHT - FONT_SIZE))
+
+        # Derecha
         text_surface = font.render(
             f"Fichas por mover: {linja.turnos_restantes}", True, (255, 255, 255)
         )
-        screen.blit(
-            text_surface, (10, SCREEN_HEIGHT - FONT_SIZE + 5)
-        ) 
+        screen.blit(text_surface, (SCREEN_WIDTH - 210, SCREEN_HEIGHT - 60))
 
         text_surface2 = font.render(
             f"Casillas a mover: {linja.cantidadMovimiento}", True, (255, 255, 255)
         )
-        screen.blit(
-            text_surface2, (SCREEN_WIDTH - 300, SCREEN_HEIGHT - FONT_SIZE + 5)
-        ) 
+        screen.blit(text_surface2, (SCREEN_WIDTH - 210, SCREEN_HEIGHT - FONT_SIZE))
 
         pygame.display.flip()
         clock.tick(60)
