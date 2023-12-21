@@ -180,28 +180,34 @@ def main():
     while running:
         if linja.jugador == 1 and not linja.fin_del_juego():
             for event in pygame.event.get():
+
                 if event.type == pygame.QUIT:
                     running = False
+
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     x, y = pygame.mouse.get_pos()
+
                     if pygame.mouse.get_pressed()[0]:  # Botón izquierdo del mouse
+                        
                         if not selected_piece:
                             selected_piece = select_piece(x, y)
+
                         else:
                             move_piece(selected_piece, x, y)
                             selected_piece = None
+
                     elif pygame.mouse.get_pressed()[2]:  # Botón derecho del mouse
                         print(f"jugador: {linja.jugador}")
                         deselect_piece()
                         selected_piece = None
+
         elif linja.jugador == 2 and not linja.fin_del_juego():
-            print("Tablero viejo: \n",linja.tablero)
             new_board = minimax(linja, 2)[0]
             linja.tablero = copy.deepcopy(new_board)
-            print("Tablero nuevo: \n",linja.tablero)
             global board
             board = linja.tablero
             linja.jugador = 1
+
         elif (linja.fin_del_juego):
             print("El juego ha terminado")
 
@@ -215,14 +221,14 @@ def main():
         )
         screen.blit(
             text_surface, (10, SCREEN_HEIGHT - FONT_SIZE + 5)
-        )  # 10 píxeles desde el borde y 10 píxeles por encima del borde inferior
+        ) 
 
         text_surface2 = font.render(
             f"Casillas a mover: {linja.cantidadMovimiento}", True, (255, 255, 255)
         )
         screen.blit(
             text_surface2, (SCREEN_WIDTH - 300, SCREEN_HEIGHT - FONT_SIZE + 5)
-        )  # 150 píxeles desde el borde derecho y 10 píxeles por encima del borde inferior
+        ) 
 
         pygame.display.flip()
         clock.tick(60)
